@@ -1,14 +1,14 @@
-// project_2/server/index.js (ĐÃ SỬA CHỮA)
+// project_2/server/index.js (PHIÊN BẢN HOÀN CHỈNH ĐỂ DEPLOY LÊN RENDER)
 
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const mongoose = require('mongoose');
-// KHẮC PHỤC LỖI 1: THÊM fs module
+// ✅ Đã sửa lỗi: Thêm fs module để sử dụng fs.existsSync
 const fs = require('fs'); 
 
-// KHẮC PHỤC LỖI 2: Dòng này chỉ nên dùng khi phát triển cục bộ.
-// Render sẽ cung cấp biến môi trường MONGODB_URI và PORT.
+// 🛑 KHÔNG CẦN DÙNG TRÊN RENDER: Render tự động cung cấp biến môi trường
+// (Chú thích/Xóa dòng này khi deploy)
 // require('dotenv').config({ path: path.resolve(__dirname, '.env') }); 
 
 const app = express();
@@ -25,10 +25,9 @@ const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/render_d
 mongoose.connect(MONGODB_URI)
     .then(() => console.log('✅ MongoDB connected successfully!'))
     .catch(err => {
-        // In lỗi chi tiết ra console để dễ gỡ lỗi hơn trên Render Logs
+        // Lỗi này xảy ra nếu MONGO_URI chưa được cấu hình đúng trên Render
         console.error('❌ MongoDB connection error:', err);
-        // Tùy chọn: Thoát ứng dụng nếu kết nối DB thất bại để tránh chạy ứng dụng không có DB
-        // process.exit(1); 
+        // Tùy chọn: process.exit(1); để buộc ứng dụng thoát nếu không kết nối được DB
     });
 
 // Định nghĩa Schema (Cấu trúc dữ liệu)
@@ -40,10 +39,8 @@ const TaskSchema = new mongoose.Schema({
 const Task = mongoose.model('Task', TaskSchema);
 
 // --- 2. API ROUTES ---
-// Lấy tất cả tasks
 app.get('/api/tasks', async (req, res) => {
     try {
-        // Sắp xếp theo thứ tự mới tạo trước
         const tasks = await Task.find().sort({ createdAt: -1 });
         res.json(tasks);
     } catch (error) {
@@ -51,7 +48,6 @@ app.get('/api/tasks', async (req, res) => {
     }
 });
 
-// Thêm task mới
 app.post('/api/tasks', async (req, res) => {
     try {
         const newTask = new Task({ title: req.body.title });
@@ -62,14 +58,15 @@ app.post('/api/tasks', async (req, res) => {
     }
 });
 
-// --- 3. CẤU HÌNH DEPLOY LÊN RENDER (QUAN TRỌNG) ---
+// --- 3. CẤU HÌNH DEPLOY LÊN RENDER ---
 // Phục vụ các file đã build của React
 const clientBuildPath = path.join(__dirname, '../client/dist');
 app.use(express.static(clientBuildPath));
 
-// Đối với bất kỳ request nào khác (SPA Routing), trả về file index.html
-app.get('*', (req, res) => {
-    // Chỉ gửi file này nếu nó tồn tại (sau khi client build)
+// ✅ Đã sửa lỗi: Thay đổi từ app.get('*', ... thành app.get('/*', ...)
+// Đây là tuyến đường catch-all (wildcard) cho phép React Router xử lý các tuyến đường
+app.get('/*', (req, res) => { 
+    // Đảm bảo rằng tệp index.html đã được tạo ra sau khi 'npm run build' thành công
     if (fs.existsSync(path.join(clientBuildPath, 'index.html'))) {
         res.sendFile(path.join(clientBuildPath, 'index.html'));
     } else {
