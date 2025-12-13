@@ -7,7 +7,6 @@ function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 1. Lấy dữ liệu khi load trang
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -25,9 +24,8 @@ function App() {
     }
   };
 
-  // 2. Thêm Task
   const addTask = async (e) => {
-    e.preventDefault(); // Ngăn load lại trang
+    e.preventDefault();
     if (!input.trim()) return;
 
     try {
@@ -44,7 +42,6 @@ function App() {
     }
   };
 
-  // 3. Xóa Task
   const deleteTask = async (id) => {
     try {
       await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
@@ -54,7 +51,6 @@ function App() {
     }
   };
 
-  // 4. Toggle Hoàn thành
   const toggleTask = async (id) => {
     try {
       const res = await fetch(`/api/tasks/${id}`, { method: 'PUT' });
@@ -74,7 +70,6 @@ function App() {
         <h1>📝 Quản Lý Công Việc</h1>
         <p className="subtitle">Dữ liệu được lưu trực tiếp vào MongoDB</p>
 
-        {/* Form nhập liệu */}
         <form onSubmit={addTask} className="input-group">
           <input 
             type="text" 
@@ -85,7 +80,6 @@ function App() {
           <button type="submit">Thêm</button>
         </form>
 
-        {/* Danh sách công việc */}
         {loading ? (
           <p>Đang tải dữ liệu...</p>
         ) : (
