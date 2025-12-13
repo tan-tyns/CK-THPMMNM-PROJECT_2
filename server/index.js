@@ -59,14 +59,12 @@ app.post('/api/tasks', async (req, res) => {
 });
 
 // --- 3. CẤU HÌNH DEPLOY LÊN RENDER ---
-// Phục vụ các file đã build của React
 const clientBuildPath = path.join(__dirname, '../client/dist');
 app.use(express.static(clientBuildPath));
 
-// ✅ Đã sửa lỗi: Thay đổi từ app.get('*', ... thành app.get('/*', ...)
-// Đây là tuyến đường catch-all (wildcard) cho phép React Router xử lý các tuyến đường
-// Sửa thành:
-app.get('*', (req, res) => { 
+// ✅ SỬA LỖI QUAN TRỌNG:
+// Thay vì dùng '*' hay '/*', hãy dùng cú pháp Regex này để bắt tất cả các routes còn lại
+app.get(/(.*)/, (req, res) => { 
     if (fs.existsSync(path.join(clientBuildPath, 'index.html'))) {
         res.sendFile(path.join(clientBuildPath, 'index.html'));
     } else {
@@ -75,5 +73,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
