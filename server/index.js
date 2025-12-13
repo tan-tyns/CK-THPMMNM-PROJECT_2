@@ -65,13 +65,13 @@ app.use(express.static(clientBuildPath));
 
 // ✅ Đã sửa lỗi: Thay đổi từ app.get('*', ... thành app.get('/*', ...)
 // Đây là tuyến đường catch-all (wildcard) cho phép React Router xử lý các tuyến đường
-app.get('/*', (req, res) => { 
-    // Đảm bảo rằng tệp index.html đã được tạo ra sau khi 'npm run build' thành công
-    if (fs.existsSync(path.join(clientBuildPath, 'index.html'))) {
-        res.sendFile(path.join(clientBuildPath, 'index.html'));
-    } else {
-        res.status(404).send("Frontend not built. Run 'npm run build' first.");
-    }
+// Sửa thành:
+app.get('*', (req, res) => { 
+    if (fs.existsSync(path.join(clientBuildPath, 'index.html'))) {
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
+    } else {
+        res.status(404).send("Frontend not built. Run 'npm run build' first.");
+    }
 });
 
 app.listen(PORT, () => {
