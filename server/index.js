@@ -99,7 +99,7 @@ app.get(/(.*)/, (req, res) => {
         res.status(404).send("Frontend not built. Run 'npm run build' first.");
     }
 });
-
+//test merge
 // --- 4. KHỞI ĐỘNG SERVER ---
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
